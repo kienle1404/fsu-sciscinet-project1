@@ -1,15 +1,3 @@
-"""
-Flask API Server
-----------------
-REST API to serve network and chart data for visualization.
-
-Features:
-- Flask routing with multiple endpoints
-- JSON response formatting
-- CORS enabled for frontend access
-- Error handling for missing data
-"""
-
 from flask import Flask, jsonify
 from flask_cors import CORS
 import json
@@ -49,7 +37,6 @@ except FileNotFoundError as e:
 def home():
     """
     Home route - just returns a welcome message.
-    You can test this by visiting http://localhost:5000/ in your browser.
     """
     return jsonify({
         "message": "FSU CS Research Network API",
@@ -66,9 +53,6 @@ def home():
 def get_citation_network():
     """
     Return the citation network (papers citing papers).
-
-    Returns:
-        JSON with "nodes" (papers) and "links" (citations)
     """
     return jsonify(citation_network)
 
@@ -76,10 +60,7 @@ def get_citation_network():
 @app.route('/api/collaboration-network')
 def get_collaboration_network():
     """
-    Return the collaboration network (authors working together).
-
-    Returns:
-        JSON with "nodes" (authors) and "links" (collaborations)
+    Return the collaboration network.
     """
     return jsonify(collaboration_network)
 
@@ -87,10 +68,7 @@ def get_collaboration_network():
 @app.route('/api/timeline')
 def get_timeline():
     """
-    Return publication counts by year.
-
-    Returns:
-        JSON array of {year, count} objects
+    Return publication counts by year
     """
     return jsonify(timeline_data)
 
@@ -99,12 +77,10 @@ def get_timeline():
 def get_histogram(year):
     """
     Return citation distribution for a specific year.
-
-    Args:
-        year: Publication year (from URL)
-
+    Args: 
+    year: Publication year (from URL)
     Returns:
-        JSON array of {label, count} objects for histogram bins
+    JSON array of {label, count} objects for histogram bins
     """
     # Convert year to string (that's how it's stored in our data)
     year_str = str(year)
@@ -123,12 +99,6 @@ def get_histogram(year):
 if __name__ == '__main__':
     """
     Start the Flask development server.
-
-    The server will run on:
-    - Host: localhost (127.0.0.1)
-    - Port: 5000
-    - Debug mode: True (auto-reloads when you change code)
-
     Access it at: http://localhost:5000
     """
     print("\n" + "="*50)

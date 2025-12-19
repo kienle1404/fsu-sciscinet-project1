@@ -1,21 +1,8 @@
-"""
-Network Preprocessing
----------------------
-This script processes raw paper data and creates network structures for visualization.
-
-Features:
-1. Builds citation networks (papers citing papers)
-2. Builds collaboration networks (authors working together)
-3. Generates timeline and histogram data for dashboards
-4. Optimizes data structures for efficient visualization
-"""
-
 import json
 from typing import List, Dict, Set
 from collections import defaultdict
 
 def load_papers(filename: str) -> List[Dict]:
-    """Load papers from JSON file."""
     with open(filename, 'r', encoding='utf-8') as f:
         return json.load(f)
 
@@ -23,14 +10,11 @@ def load_papers(filename: str) -> List[Dict]:
 def build_citation_network(papers: List[Dict]) -> Dict:
     """
     Build a citation network where edges represent citations between papers.
-
-    How it works:
     - Each paper has a list of "referenced_works" (papers it cites)
     - We create edges only if BOTH papers are in our dataset
     - This keeps the network connected and manageable
-
     Returns:
-        Dictionary with "nodes" (papers) and "links" (citations)
+    Dictionary with "nodes" (papers) and "links" (citations)
     """
     print("Building citation network...")
 
@@ -51,7 +35,6 @@ def build_citation_network(papers: List[Dict]) -> Dict:
     links = []
     for paper in papers:
         source_id = paper["id"]
-
         # Check each paper this one references
         for ref_id in paper.get("referenced_works", []):
             # Only create link if the referenced paper is in our dataset
@@ -61,7 +44,7 @@ def build_citation_network(papers: List[Dict]) -> Dict:
                     "target": ref_id
                 })
 
-    print(f"  Created {len(nodes)} nodes and {len(links)} links")
+    print(f"Created {len(nodes)} nodes and {len(links)} links")
 
     return {
         "nodes": nodes,
@@ -72,25 +55,20 @@ def build_citation_network(papers: List[Dict]) -> Dict:
 def build_collaboration_network(papers: List[Dict]) -> Dict:
     """
     Build a collaboration network where edges represent co-authorship.
-
-    How it works:
     - For each paper, we look at all authors
     - If two authors wrote a paper together, we create an edge
     - Edge "weight" = number of papers they co-authored
-
     Returns:
-        Dictionary with "nodes" (authors) and "links" (collaborations)
+    Dictionary with "nodes" (authors) and "links" (collaborations)
     """
     print("Building collaboration network...")
 
-    # Track author information
+    # Track author and co-authorship information
     author_info = defaultdict(lambda: {"papers": 0, "name": ""})
-    # Track co-authorship (collaboration edges)
     collaborations = defaultdict(int)
 
     for paper in papers:
         authors = []
-
         # Extract author information
         for authorship in paper.get("authorships", []):
             author_data = authorship.get("author", {})
@@ -105,7 +83,7 @@ def build_collaboration_network(papers: List[Dict]) -> Dict:
         # Create collaboration edges between all pairs of authors on this paper
         for i, author1 in enumerate(authors):
             for author2 in authors[i+1:]:
-                # Sort IDs to avoid duplicate edges (A-B and B-A)
+                # Sort IDs to avoid duplicate edges
                 edge = tuple(sorted([author1, author2]))
                 collaborations[edge] += 1
 
@@ -119,7 +97,7 @@ def build_collaboration_network(papers: List[Dict]) -> Dict:
         })
 
     # Build links (only keep collaborations with 2+ papers together)
-    # This reduces noise and keeps the network readable
+    # Reduces noise and keeps the network readable
     links = []
     for (author1, author2), weight in collaborations.items():
         if weight >= 2:  # Filter: only show if they worked together 2+ times
@@ -140,9 +118,6 @@ def build_collaboration_network(papers: List[Dict]) -> Dict:
 def build_timeline_data(papers: List[Dict]) -> List[Dict]:
     """
     Count papers by year for the timeline chart.
-
-    Returns:
-        List of {year, count} dictionaries
     """
     print("Building timeline data...")
 
@@ -155,16 +130,13 @@ def build_timeline_data(papers: List[Dict]) -> List[Dict]:
     timeline = [{"year": year, "count": count}
                 for year, count in sorted(year_counts.items())]
 
-    print(f"  Created timeline data for {len(timeline)} years")
+    print(f"Created timeline data for {len(timeline)} years")
     return timeline
 
 
 def build_histogram_data(papers: List[Dict]) -> Dict[int, List[Dict]]:
     """
     Build citation distribution histograms for each year.
-
-    Returns:
-        Dictionary mapping year -> histogram bins
     """
     print("Building histogram data...")
 
@@ -200,19 +172,17 @@ def build_histogram_data(papers: List[Dict]) -> Dict[int, List[Dict]]:
 
         histograms[year] = histogram
 
-    print(f"  Created histogram data for {len(histograms)} years")
+    print(f"Created histogram data for {len(histograms)} years")
     return histograms
 
 
 def save_json(data, filename):
-    """Save data to JSON file."""
     with open(filename, 'w', encoding='utf-8') as f:
         json.dump(data, f, indent=2)
     print(f"Saved {filename}")
 
 
 if __name__ == "__main__":
-    # Load the papers data
     papers = load_papers("fsu_cs_papers.json")
 
     # Build all the networks and charts
@@ -221,10 +191,9 @@ if __name__ == "__main__":
     timeline_data = build_timeline_data(papers)
     histogram_data = build_histogram_data(papers)
 
-    # Save everything
     save_json(citation_network, "citation_network.json")
     save_json(collaboration_network, "collaboration_network.json")
     save_json(timeline_data, "timeline_data.json")
     save_json(histogram_data, "histogram_data.json")
 
-    print("\n✓ All preprocessing complete!")
+    print("\nAll preprocessing complete!")
